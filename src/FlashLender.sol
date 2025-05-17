@@ -39,7 +39,7 @@ error flashLender__TransferFailed();
 error flashLender__CallbackFailed();
 error flashLender__RepayFailed();
 
- contract flashLender is IERC3156FlashLender {
+contract FlashLender is IERC3156FlashLender {
     /*//////////////////////////////////////////////////////////////
                             STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
@@ -120,5 +120,12 @@ error flashLender__RepayFailed();
         require(supportedTokens[token], flashLender__UnsupportedToken(token));
 
         return _flashFee(token, amount);
+    }
+
+    function getSupportedTokens(address token) external view returns (bool) {
+        bool tokenStatus = supportedTokens[token];
+
+        return tokenStatus;
+
     }
 }

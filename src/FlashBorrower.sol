@@ -5,9 +5,10 @@ import {IERC20} from "./interfaces/IERC20.sol";
 import {IERC3156FlashBorrower} from "./interfaces/IERC3156FlashBorrower.sol";
 import {IERC3156FlashLender} from "./interfaces/IERC3156FlashLender.sol";
 
-contract flashBorrower is IERC3156FlashBorrower {
+contract FlashBorrower is IERC3156FlashBorrower {
     error flashBorrower__UntrustedLender(address lender);
     error flashBorrower__UntrustedLoanInitiator(address initiator);
+    bool public tx_success = false;
 
     enum Action {
         NORMAL,
@@ -38,7 +39,7 @@ contract flashBorrower is IERC3156FlashBorrower {
         (Action action) = abi.decode(data, (Action));
 
         if (action == Action.NORMAL) {
-            // aksiyona gore ne yapilacagini buradan belirleyebiliriz
+            tx_success = true;
         }
 
         if (action == Action.OTHER) {}
@@ -48,11 +49,12 @@ contract flashBorrower is IERC3156FlashBorrower {
 
     function flashBorrow(address token, uint256 amount) public {
         bytes memory data = abi.encode(Action.NORMAL);
+        IERC20(token).approve(address(lender), amount);
         uint256 allowance = IERC20(token).allowance(address(this), address(lender));
         uint256 fee = lender.flashFee(token, amount);
         uint256 repayment = amount + fee;
         IERC20(token).approve(address(lender), allowance + repayment);
-        lender.flashLoan(IERC3156FlashBorrower(this), token, amount, data); 
+        lender.flashLoan(IERC3156FlashBorrower(this), token, amount, data);
 
     }
 }
